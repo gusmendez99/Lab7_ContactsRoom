@@ -11,6 +11,7 @@ import kotlinx.android.synthetic.main.toolbar.*
 
 class EmailReceiverActivity : AppCompatActivity() {
 
+    //Initial strings for save passed info
     lateinit var sender:String
     lateinit var receiver:String
     lateinit var message:String
@@ -30,6 +31,7 @@ class EmailReceiverActivity : AppCompatActivity() {
             }
         }
 
+        //Button for send message
         btn_send.setOnClickListener {
             sender = et_email_sender.text.toString()
             receiver = et_email_receiver.text.toString()

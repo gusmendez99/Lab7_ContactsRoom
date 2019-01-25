@@ -21,6 +21,7 @@ class ContactInfoActivity : AppCompatActivity() {
         my_toolbar.title = "Ver Contacto"
         setSupportActionBar(my_toolbar)
 
+        //Parsing data from the intent
         val savedContactName = intent.getStringExtra(MyApplication.SAVED_CONTACT_NAME)
         val savedContactPhone = intent.getStringExtra(MyApplication.SAVED_CONTACT_PHONE)
         val savedContactEmail = intent.getStringExtra(MyApplication.SAVED_CONTACT_EMAIL)
@@ -32,6 +33,7 @@ class ContactInfoActivity : AppCompatActivity() {
         tv_contact_email.setOnClickListener {
             val emailIntent = Intent(Intent.ACTION_SEND)
 
+            //Making the intent for email
             emailIntent.data = Uri.parse("mailto:")
             emailIntent.type = "text/plain"
             emailIntent.putExtra(Intent.EXTRA_EMAIL, savedContactEmail)

@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         // Access the RecyclerView Adapter and load the data into it
         adapter = ContactAdapter(MyApplication.getContacts(), this) { contact ->
             run {
-                //TODO: show clicked contact
+                //Get a callback with the contact info
                 val intent = Intent(this, ContactInfoActivity::class.java)
                 intent.putExtra(MyApplication.SAVED_CONTACT_NAME, contact.name)
                 intent.putExtra(MyApplication.SAVED_CONTACT_PHONE, contact.phone)
@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        //Setting the recycler adapter
         rv_contact_list.adapter = adapter
 
         btn_add_contact.setOnClickListener {
