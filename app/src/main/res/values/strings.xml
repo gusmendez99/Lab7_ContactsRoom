@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Lab3_Contacts</string>
+    <string name="new_contact">Agregar contacto</string>
+    <string name="contacts">Contactos</string>
+    <string name="contact_name">Nombre</string>
+    <string name="contact_email">Email</string>
+    <string name="contact_phone">Telefono</string>
+    <string name="create">Crear</string>
+    <string name="back">Regresar</string>
+</resources>
