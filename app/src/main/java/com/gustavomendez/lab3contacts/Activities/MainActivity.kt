@@ -8,6 +8,7 @@ import com.gustavomendez.lab3contacts.Adapters.ContactAdapter
 import com.gustavomendez.lab3contacts.MyApplication
 import com.gustavomendez.lab3contacts.R
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.toolbar.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,6 +19,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        my_toolbar.title = "Mis Contactos"
+        setSupportActionBar(my_toolbar)
 
         // Creates a vertical Layout Manager
         rv_contact_list.layoutManager = LinearLayoutManager(this)
