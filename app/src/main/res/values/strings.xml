@@ -8,4 +8,6 @@
     <string name="create">Crear</string>
     <string name="back">Regresar</string>
     <string name="send">Enviar</string>
+    <string name="contact_sender">Destinatario</string>
+    <string name="email_message">Mensaje</string>
 </resources>

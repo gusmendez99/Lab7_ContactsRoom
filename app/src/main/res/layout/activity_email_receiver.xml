@@ -34,6 +34,7 @@
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
         />
 
     </LinearLayout>
@@ -57,7 +58,7 @@
                 android:id="@+id/et_email_receiver"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/contact_name"
+                android:hint="@string/contact_sender"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:layout_marginTop="12dp"
@@ -81,7 +82,7 @@
             android:id="@+id/et_email_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/contact_name"
+            android:hint="@string/email_message"
             android:layout_marginLeft="20dp"
             android:lines="5"
             android:layout_marginRight="20dp"
