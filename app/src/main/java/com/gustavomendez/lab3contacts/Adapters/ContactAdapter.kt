@@ -36,5 +36,7 @@ class ContactAdapter(
             setOnClickListener { listener(contact) }
         }
     }
+
+
 }
 

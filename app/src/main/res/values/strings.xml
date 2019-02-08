@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Lab3_Contacts</string>
+    <string name="app_name">Lab 5 - Contacts</string>
     <string name="new_contact">Agregar contacto</string>
     <string name="contacts">Contactos</string>
     <string name="contact_name">Nombre</string>
@@ -10,4 +10,6 @@
     <string name="send">Enviar</string>
     <string name="contact_sender">Destinatario</string>
     <string name="email_message">Mensaje</string>
+    <string name="edit">Editar</string>
+    <string name="save">Guardar</string>
 </resources>

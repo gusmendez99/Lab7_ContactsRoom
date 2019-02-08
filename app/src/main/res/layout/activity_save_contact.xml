@@ -7,11 +7,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".Activities.AddContactActivity">
+        tools:context=".Activities.SaveContactActivity">
 
     <include layout="@layout/toolbar"/>
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_contact"
             android:layout_gravity="center_horizontal"
             android:layout_width="200dp"
@@ -73,7 +73,7 @@
         />
 
         <Button
-                android:id="@+id/btn_create_contact"
+                android:id="@+id/btn_save_contact"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
