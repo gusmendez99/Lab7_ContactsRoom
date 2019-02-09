@@ -20,11 +20,11 @@ class ContactsProvider : ContentProvider() {
         internal const val URL = "content://$PROVIDER_NAME/contacts"
         internal val CONTENT_URI = Uri.parse(URL)
 
-        internal val _ID = "_id"
-        internal val NAME = "name"
-        internal val EMAIL = "email"
-        internal val PHONE = "phone"
-        internal val IMAGE_PATH = "image_path"
+        internal const val _ID = "_id"
+        internal const val NAME = "name"
+        internal const val EMAIL = "email"
+        internal const val PHONE = "phone"
+        internal const val IMAGE_PATH = "image_path"
 
         private val CONTACTS_PROJECTION_MAP: HashMap<String, String>? = null
 
@@ -41,6 +41,9 @@ class ContactsProvider : ContentProvider() {
         internal const val DATABASE_NAME = "ContactBook"
         internal const val CONTACTS_TABLE_NAME = "contacts"
         internal const val DATABASE_VERSION = 1
+        /**
+         * Table with a image path field, can be null by default
+         */
         internal const val CREATE_DB_TABLE = " CREATE TABLE " + CONTACTS_TABLE_NAME +
                 " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 " name TEXT NOT NULL, " +
@@ -82,6 +85,9 @@ class ContactsProvider : ContentProvider() {
         return db != null
     }
 
+    /**
+     * Add new contact to SQLite
+     */
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
         /**
          * Add a new student record
@@ -100,6 +106,9 @@ class ContactsProvider : ContentProvider() {
         throw SQLException("Failed to add a record into $uri")
     }
 
+    /**
+     * Get all contacts, or get a contact by _id
+     */
     override fun query(
         uri: Uri, projection: Array<String>?,
         selection: String?, selectionArgs: Array<String>?, sortOrder: String?
@@ -125,6 +134,9 @@ class ContactsProvider : ContentProvider() {
         return c
     }
 
+    /**
+     * For delete a contact by _id, return zero if there's no contact with the id*
+     */
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         var count = 0
         count = when (uriMatcher.match(uri)) {
@@ -144,6 +156,9 @@ class ContactsProvider : ContentProvider() {
         return count
     }
 
+    /**
+     * For update a contact by _id
+     */
     override fun update(
         uri: Uri, values: ContentValues?,
         selection: String?, selectionArgs: Array<String>?
@@ -171,7 +186,7 @@ class ContactsProvider : ContentProvider() {
              */
             CONTACTS -> return "vnd.android.cursor.dir/vnd.example.contacts"
             /**
-             * Get a particular student
+             * Get a particular contact
              */
             CONTACTS_1 -> return "vnd.android.cursor.item/vnd.example.contacts"
             else -> throw IllegalArgumentException("Unsupported URI: $uri")

@@ -11,9 +11,9 @@ import kotlinx.android.synthetic.main.contact_list_item.view.*
 
 class ContactAdapter(
     private val items : ArrayList<Contact>, private val context: Context,
-    private val listener: (Contact) -> Unit) : RecyclerView.Adapter<ContactAdapter.ViewHolder>() {
+    private val listener: (Contact, Boolean) -> Unit) : RecyclerView.Adapter<ContactAdapter.ViewHolder>() {
 
-    // Gets the number of animals in the list
+    // Gets the number of contatcs in the list
     override fun getItemCount(): Int {
         return items.size
     }
@@ -23,17 +23,25 @@ class ContactAdapter(
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.contact_list_item, parent, false))
     }
 
-    // Binds each animal in the ArrayList to a view
+    // Binds each contact in the ArrayList to a view
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItems(items[position],listener)
+        holder.bindItems(items[position], listener)
     }
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-        fun bindItems(contact: Contact, listener: (Contact) -> Unit) = with(itemView) {
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        //Binding each item, with a listener
+        fun bindItems(contact: Contact, listener: (Contact, Boolean) -> Unit) = with(itemView) {
 
             itemView.tv_contact_info.text = contact.toString()
-            setOnClickListener { listener(contact) }
+            //Listener return false if there's a single click
+            setOnClickListener { listener(contact, false) }
+            //Listener return true if there's a long click
+            setOnLongClickListener {
+                listener(contact, true)
+                items.removeAt(adapterPosition)
+                notifyDataSetChanged()
+                return@setOnLongClickListener true
+            }
         }
     }
 

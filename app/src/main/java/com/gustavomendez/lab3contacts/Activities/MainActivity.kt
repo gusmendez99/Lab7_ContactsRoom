@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v7.widget.LinearLayoutManager
 import com.gustavomendez.lab3contacts.Adapters.ContactAdapter
 import com.gustavomendez.lab3contacts.Models.Contact
@@ -18,11 +19,6 @@ class MainActivity : AppCompatActivity() {
         lateinit var adapter: ContactAdapter
         //Constants for the intent keys
         const val SAVED_CONTACT_ID = "savedContactId"
-        const val SAVED_CONTACT_NAME = "savedContactName"
-        const val SAVED_CONTACT_PHONE = "savedContactPhone"
-        const val SAVED_CONTACT_EMAIL = "savedContactEmail"
-        const val SAVED_CONTACT_IMAGE_PATH = "savedContactImagePath"
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,43 +29,36 @@ class MainActivity : AppCompatActivity() {
 
         // Creates a vertical Layout Manager
         rv_contact_list.layoutManager = LinearLayoutManager(this)
-        updateDataSet()
+        // Access the RecyclerView Adapter and load the data into it
+        adapter = ContactAdapter(getContacts(), this) { contact, isLongClick ->
+            run {
+                //Get a callback with the contact info
+                if(isLongClick){
+                    //Long click used to remove contacts
+                    if(removeContact(contact._id)){
+                        Snackbar.make(parent_view, "Contacto '${contact.name}' eliminado", Snackbar.LENGTH_LONG).show()
+                    } else {
+                        Snackbar.make(parent_view, "Error al borrar contacto...", Snackbar.LENGTH_LONG).show()
+                    }
+
+                } else {
+                    //Simple onClickListener
+                    val intent = Intent(this, ContactInfoActivity::class.java)
+                    intent.putExtra(SAVED_CONTACT_ID, contact._id)
+                    startActivity(intent)
+                    this.finish()
+
+                }
+            }
+        }
 
         //Setting the recycler adapter
         rv_contact_list.adapter = adapter
-
-        //TODO: Insert into DB as dummy contacts
-        /*
-        * Contact("Luis Urbina", "54786521", "urbina212@gmail.com"),
-            Contact("Mario Perdomo", "41256323", "mario@gmailc.com"),
-            Contact("Diego Estrada", "41257895", "diego@gmail.com")
-        * */
 
         btn_add_contact.setOnClickListener {
             startActivity(Intent(this, SaveContactActivity::class.java))
             this.finish()
         }
-    }
-
-    private fun updateDataSet() {
-
-        // Access the RecyclerView Adapter and load the data into it
-        adapter = ContactAdapter(getContacts(), this) { contact ->
-            run {
-                //Get a callback with the contact info
-                val intent = Intent(this, ContactInfoActivity::class.java)
-                intent.putExtra(SAVED_CONTACT_ID, contact._id)
-                intent.putExtra(SAVED_CONTACT_NAME, contact.name)
-                intent.putExtra(SAVED_CONTACT_PHONE, contact.phone)
-                intent.putExtra(SAVED_CONTACT_EMAIL, contact.email)
-                intent.putExtra(SAVED_CONTACT_IMAGE_PATH, contact.imagePath)
-
-                startActivity(intent)
-                this.finish()
-
-            }
-        }
-
     }
 
     private fun getContacts(): ArrayList<Contact> {
@@ -95,6 +84,15 @@ class MainActivity : AppCompatActivity() {
         }
         c.close()
         return myContacts
+    }
+
+    private fun removeContact(id: Int):Boolean {
+        // Delete contact records
+        val URL = "content://com.gustavomendez.ContactsProvider/contacts/$id"
+        val contact = Uri.parse(URL)
+        val count = contentResolver.delete(contact, null, null)
+
+        return count > 0
     }
 
 

@@ -8,11 +8,7 @@ import android.net.Uri
 import android.support.design.widget.Snackbar
 import android.util.Log
 import com.bumptech.glide.Glide
-import com.gustavomendez.lab3contacts.Activities.MainActivity.Companion.SAVED_CONTACT_EMAIL
 import com.gustavomendez.lab3contacts.Activities.MainActivity.Companion.SAVED_CONTACT_ID
-import com.gustavomendez.lab3contacts.Activities.MainActivity.Companion.SAVED_CONTACT_IMAGE_PATH
-import com.gustavomendez.lab3contacts.Activities.MainActivity.Companion.SAVED_CONTACT_NAME
-import com.gustavomendez.lab3contacts.Activities.MainActivity.Companion.SAVED_CONTACT_PHONE
 import com.gustavomendez.lab3contacts.Models.Contact
 import com.gustavomendez.lab3contacts.Providers.ContactsProvider
 import kotlinx.android.synthetic.main.activity_contact_info.*
@@ -29,18 +25,14 @@ class ContactInfoActivity : AppCompatActivity() {
 
         //Parsing data from the intent
         val savedContactId = intent.getIntExtra(SAVED_CONTACT_ID, -1)
-        //TODO: get this data with Content Provider
-        val savedContactName = intent.getStringExtra(SAVED_CONTACT_NAME)
-        val savedContactPhone = intent.getStringExtra(SAVED_CONTACT_PHONE)
-        val savedContactEmail = intent.getStringExtra(SAVED_CONTACT_EMAIL)
-        val savedContactPhotoPath = intent.getStringExtra(SAVED_CONTACT_IMAGE_PATH)
+        val savedContact = getContact(savedContactId)
 
-        tv_contact_name.text = savedContactName
-        tv_contact_phone.text = savedContactPhone
-        tv_contact_email.text = savedContactEmail
+        tv_contact_name.text = savedContact?.name
+        tv_contact_phone.text = savedContact?.phone
+        tv_contact_email.text = savedContact?.email
 
-        if(savedContactPhotoPath.isNotEmpty()){
-            Glide.with(this).load(savedContactPhotoPath).into(iv_contact)
+        if(savedContact!!.imagePath.isNotEmpty()){
+            Glide.with(this).load(savedContact!!.imagePath).into(iv_contact)
         }
 
         tv_contact_email.setOnClickListener {
@@ -49,7 +41,7 @@ class ContactInfoActivity : AppCompatActivity() {
             //Making the intent for email
             emailIntent.data = Uri.parse("mailto:")
             emailIntent.type = "text/plain"
-            emailIntent.putExtra(Intent.EXTRA_EMAIL, savedContactEmail)
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, savedContact!!.email)
             emailIntent.putExtra(Intent.EXTRA_TEXT, "Mi nombre es Gus Mendez, y mi teléfono es 32349997")
 
             try {
@@ -61,7 +53,7 @@ class ContactInfoActivity : AppCompatActivity() {
         }
 
         tv_contact_phone.setOnClickListener {
-            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$savedContactPhone"))
+            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${savedContact.phone}"))
             startActivity(intent)
         }
 
@@ -81,5 +73,33 @@ class ContactInfoActivity : AppCompatActivity() {
 
     }
 
+    private fun getContact(id: Int): Contact? {
+        var currentContact: Contact? = null
+        // Retrieve student records
+        val URL = "content://com.gustavomendez.ContactsProvider/contacts/$id"
+        val contact = Uri.parse(URL)
+        val c = contentResolver.query(contact, null, null, null, "name")
+
+        if (c.moveToFirst()) {
+            currentContact = Contact(
+                c.getColumnIndex(ContactsProvider._ID),
+                c.getString(c.getColumnIndex(ContactsProvider.NAME)),
+                c.getString(c.getColumnIndex(ContactsProvider.PHONE)),
+                c.getString(c.getColumnIndex(ContactsProvider.EMAIL)),
+                c.getString(c.getColumnIndex(ContactsProvider.IMAGE_PATH))
+            )
+
+        }
+        c.close()
+
+        return currentContact
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        this.finish()
+    }
 
 }

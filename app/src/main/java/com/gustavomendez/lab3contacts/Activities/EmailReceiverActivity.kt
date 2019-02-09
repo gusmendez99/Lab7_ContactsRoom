@@ -12,8 +12,8 @@ import kotlinx.android.synthetic.main.toolbar.*
 class EmailReceiverActivity : AppCompatActivity() {
 
     //Initial strings for save passed info
-    lateinit var sender:String
-    lateinit var receiver:String
+    private lateinit var sender:String
+    private lateinit var receiver:String
     lateinit var message:String
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +42,6 @@ class EmailReceiverActivity : AppCompatActivity() {
     }
 
     private fun handleSendText (intent: Intent) {
-
         message = intent.getStringExtra(Intent.EXTRA_TEXT)
         receiver = intent.getStringExtra(Intent.EXTRA_EMAIL)
 

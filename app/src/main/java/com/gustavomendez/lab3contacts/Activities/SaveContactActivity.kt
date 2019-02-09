@@ -31,15 +31,14 @@ import java.util.*
 
 class SaveContactActivity : AppCompatActivity() {
 
-
     companion object {
         private const val IMAGE_DIRECTORY = "/demonuts"
+        private const val EXTERNAL_WRITE_REQUEST_CODE = 112
         private const val GALLERY = 1
         private const val CAMERA = 2
     }
 
     private var photoPath:String = ""
-    private val EXTERNAL_WRITE_REQUEST_CODE = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,12 +58,11 @@ class SaveContactActivity : AppCompatActivity() {
 
             setupPermissions()
 
+            //Setting up the image with Glide, if the path is not null
             if(currentContact.imagePath.isNotEmpty()) {
                 photoPath = currentContact.imagePath
-                Glide.with(this).load(currentContact.imagePath).into(iv_contact)
+                Glide.with(this).load(photoPath).into(iv_contact)
             }
-
-
         } else {
             my_toolbar.title = "Nuevo Contacto"
         }
@@ -85,7 +83,7 @@ class SaveContactActivity : AppCompatActivity() {
                 values.put(ContactsProvider.PHONE, contactPhone)
                 values.put(ContactsProvider.EMAIL, contactEmail)
                 Log.d("VALUE OF PATH", photoPath)
-                values.put(ContactsProvider.IMAGE_PATH, photoPath) //TODO: Set the path of the ImageView
+                values.put(ContactsProvider.IMAGE_PATH, photoPath)
 
                 if (savedContactId != -1) {
                     val uri = contentResolver.update(
@@ -93,7 +91,6 @@ class SaveContactActivity : AppCompatActivity() {
                         values, null, null
                     )
                     Snackbar.make(parent_view, "¡Contacto actualizado!", Snackbar.LENGTH_LONG).show()
-
 
                 } else {
                     val uri = contentResolver.insert(ContactsProvider.CONTENT_URI, values)
@@ -124,10 +121,10 @@ class SaveContactActivity : AppCompatActivity() {
 
     private fun setupPermissions() {
         val permission = ContextCompat.checkSelfPermission(this,
-            Manifest.permission.RECORD_AUDIO)
+            Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
         if (permission != PackageManager.PERMISSION_GRANTED) {
-            Log.i("SaveContactActivity", "Permission to record denied")
+            Log.i("SaveContactActivity", "Permission to write declined")
             makeRequest()
         }
     }
@@ -139,7 +136,7 @@ class SaveContactActivity : AppCompatActivity() {
     }
 
     private fun showPictureDialog() {
-
+        //Creating a new dialog, no permissions needed
         val pictureDialog = AlertDialog.Builder(this)
         pictureDialog.setTitle("Select Action")
         val pictureDialogItems = arrayOf("Select photo from gallery", "Capture photo from camera")
@@ -147,14 +144,14 @@ class SaveContactActivity : AppCompatActivity() {
             pictureDialogItems
         ) { dialog, which ->
             when (which) {
-                0 -> choosePhotoFromGallary()
+                0 -> choosePhotoFromGallery()
                 1 -> takePhotoFromCamera()
             }
         }
         pictureDialog.show()
     }
 
-    private fun choosePhotoFromGallary() {
+    private fun choosePhotoFromGallery() {
         val galleryIntent = Intent(
             Intent.ACTION_PICK,
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -176,6 +173,7 @@ class SaveContactActivity : AppCompatActivity() {
          return
          }*/
         if (requestCode == GALLERY) {
+            //To get the contact photo from the gallery
             if (data != null) {
                 val contentURI = data!!.data
                 try {
@@ -193,6 +191,7 @@ class SaveContactActivity : AppCompatActivity() {
             }
 
         } else if (requestCode == CAMERA) {
+            //For get the contact photo from the camera
             val thumbnail = data!!.extras!!.get("data") as Bitmap
             iv_contact!!.setImageBitmap(thumbnail)
             photoPath = saveImage(thumbnail)
@@ -215,6 +214,7 @@ class SaveContactActivity : AppCompatActivity() {
 
         try {
             Log.d("heel", wallpaperDirectory.toString())
+            //Creating the image on a temp directory
             val f = File(
                 wallpaperDirectory, ((Calendar.getInstance()
                     .timeInMillis).toString() + ".jpg")
@@ -239,6 +239,9 @@ class SaveContactActivity : AppCompatActivity() {
     }
 
 
+    /**
+     * Get a single contact by id, can be null
+     */
     private fun getContact(id: Int): Contact? {
         var currentContact: Contact? = null
         // Retrieve student records
@@ -262,6 +265,9 @@ class SaveContactActivity : AppCompatActivity() {
     }
 
 
+    /**
+     * Method to accept/decline permission on real time
+     */
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             EXTERNAL_WRITE_REQUEST_CODE -> {
@@ -272,5 +278,12 @@ class SaveContactActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        this.finish()
     }
 }
