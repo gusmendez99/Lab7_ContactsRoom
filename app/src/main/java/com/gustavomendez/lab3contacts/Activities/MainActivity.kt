@@ -2,10 +2,10 @@ package com.gustavomendez.lab3contacts.Activities
 
 import android.content.Intent
 import android.net.Uri
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v7.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.gustavomendez.lab3contacts.Adapters.ContactAdapter
 import com.gustavomendez.lab3contacts.Models.Contact
 import com.gustavomendez.lab3contacts.Providers.ContactsProvider
@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(my_toolbar)
 
         // Creates a vertical Layout Manager
-        rv_contact_list.layoutManager = LinearLayoutManager(this)
+        rv_contact_list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         // Access the RecyclerView Adapter and load the data into it
         adapter = ContactAdapter(getContacts(), this) { contact, isLongClick ->
             run {

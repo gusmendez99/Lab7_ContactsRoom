@@ -1,11 +1,11 @@
 package com.gustavomendez.lab3contacts.Activities
 
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.gustavomendez.lab3contacts.R
 import android.content.Intent
 import android.net.Uri
-import android.support.design.widget.Snackbar
+import com.google.android.material.snackbar.Snackbar
 import android.util.Log
 import com.bumptech.glide.Glide
 import com.gustavomendez.lab3contacts.Activities.MainActivity.Companion.SAVED_CONTACT_ID
