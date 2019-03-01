@@ -1,39 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-        android:id="@+id/parent_view"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_gravity="center_horizontal"
-        android:orientation="vertical">
+        xmlns:tools="http://schemas.android.com/tools"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".Activities.MainActivity">
 
     <include layout="@layout/toolbar"/>
 
-    <TextView android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-                android:text="@string/contacts"
-              android:layout_gravity="center_horizontal"
-              android:layout_marginTop="30dp"
-              android:textSize="28sp"
-              android:textStyle="bold"
-    />
-
-
     <androidx.recyclerview.widget.RecyclerView
+            android:layout_marginTop="?attr/actionBarSize"
             android:id="@+id/rv_contact_list"
             android:layout_width="match_parent"
             android:layout_height="225dp"
-            android:layout_margin="14dp"
+            android:layout_marginLeft="14dp"
+            android:layout_marginRight="14dp"
+            tools:itemCount="5"
     />
 
-    <Button
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_add_contact"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/new_contact"
-            android:layout_gravity="center_horizontal"
-            android:backgroundTint="@color/colorPrimary"
-            android:textColor="@android:color/white"
-    />
+            android:src="@drawable/ic_add"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_gravity="bottom|right"/>
 
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

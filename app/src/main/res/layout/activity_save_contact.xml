@@ -20,6 +20,7 @@
             android:src="@drawable/avatar"
     />
 
+
     <EditText
             android:id="@+id/et_contact_name"
             android:layout_width="match_parent"
@@ -52,7 +53,10 @@
             android:inputType="textEmailAddress"
     />
 
-
+    <NumberPicker
+            android:id="@+id/number_picker_priority"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
     <LinearLayout
             android:layout_width="match_parent"

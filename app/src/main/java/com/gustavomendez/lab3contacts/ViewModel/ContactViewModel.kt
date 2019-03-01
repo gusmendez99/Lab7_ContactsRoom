@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData
 import com.gustavomendez.lab3contacts.Models.Contact
 import com.gustavomendez.lab3contacts.Models.ContactRepository
 
-class NoteViewModel(application: Application) : AndroidViewModel(application) {
+class ContactViewModel(application: Application) : AndroidViewModel(application) {
     private var repository: ContactRepository =
         ContactRepository(application)
     private var allContacts: LiveData<List<Contact>> = repository.getAllContacts()
@@ -23,11 +23,15 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         repository.delete(contact)
     }
 
-    fun deleteAllNotes() {
+    fun deleteAllContacts() {
         repository.deleteAllContacts()
     }
 
     fun getAllContacts(): LiveData<List<Contact>> {
         return allContacts
+    }
+
+    fun getContact(id:Int): Contact {
+        return repository.getContact(id)
     }
 }

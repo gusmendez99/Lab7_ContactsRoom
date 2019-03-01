@@ -12,4 +12,5 @@
     <string name="email_message">Mensaje</string>
     <string name="edit">Editar</string>
     <string name="save">Guardar</string>
+    <string name="remove_all_contacts">Eliminar todos</string>
 </resources>

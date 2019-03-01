@@ -22,7 +22,7 @@ data class Contact(val name:String, val phone:String, val email:String, var prio
 
     override fun toString(): String {
         //For recycler view purpose
-        return "$name - $phone"
+        return name
     }
 
 }

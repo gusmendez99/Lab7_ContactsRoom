@@ -4,16 +4,23 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.gustavomendez.lab3contacts.Adapters.ContactAdapter
 import com.gustavomendez.lab3contacts.Models.Contact
-import com.gustavomendez.lab3contacts.Providers.ContactsProvider
 import com.gustavomendez.lab3contacts.R
+import com.gustavomendez.lab3contacts.ViewModel.ContactViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.toolbar.*
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var contactViewModel: ContactViewModel
 
     companion object {
         lateinit var adapter: ContactAdapter
@@ -30,25 +37,40 @@ class MainActivity : AppCompatActivity() {
         // Creates a vertical Layout Manager
         rv_contact_list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         // Access the RecyclerView Adapter and load the data into it
-        adapter = ContactAdapter(getContacts(), this) { contact, isLongClick ->
+        rv_contact_list.setHasFixedSize(true)
+
+        contactViewModel = ViewModelProviders.of(this).get(ContactViewModel::class.java)
+
+        contactViewModel.getAllContacts().observe(this, Observer<List<Contact>> {
+            adapter.submitList(it)
+        })
+
+
+        //With Observers...
+        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT.or(ItemTouchHelper.RIGHT)) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                removeContact(viewHolder.adapterPosition)
+            }
+        }
+        ).attachToRecyclerView(rv_contact_list)
+
+
+        adapter = ContactAdapter { contact ->
             run {
                 //Get a callback with the contact info
-                if(isLongClick){
-                    //Long click used to remove contacts
-                    if(removeContact(contact._id)){
-                        Snackbar.make(parent_view, "Contacto '${contact.name}' eliminado", Snackbar.LENGTH_LONG).show()
-                    } else {
-                        Snackbar.make(parent_view, "Error al borrar contacto...", Snackbar.LENGTH_LONG).show()
-                    }
+                val intent = Intent(this, ContactInfoActivity::class.java)
+                intent.putExtra(SAVED_CONTACT_ID, contact.id)
+                startActivity(intent)
+                this.finish()
 
-                } else {
-                    //Simple onClickListener
-                    val intent = Intent(this, ContactInfoActivity::class.java)
-                    intent.putExtra(SAVED_CONTACT_ID, contact._id)
-                    startActivity(intent)
-                    this.finish()
-
-                }
             }
         }
 
@@ -61,38 +83,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getContacts(): ArrayList<Contact> {
-
-        val myContacts = ArrayList<Contact>()
-        // Retrieve student records
-        val URL = "content://com.gustavomendez.ContactsProvider"
-        val contacts = Uri.parse(URL)
-        val c = contentResolver.query(contacts, null, null, null, "name")
-
-        if (c.moveToFirst()) {
-            do {
-                myContacts.add(
-                    Contact(
-                        c.getInt(c.getColumnIndex(ContactsProvider._ID)),
-                        c.getString(c.getColumnIndex(ContactsProvider.NAME)),
-                        c.getString(c.getColumnIndex(ContactsProvider.PHONE)),
-                        c.getString(c.getColumnIndex(ContactsProvider.EMAIL)),
-                        c.getString(c.getColumnIndex(ContactsProvider.IMAGE_PATH))
-                    )
-                )
-            } while (c.moveToNext())
-        }
-        c.close()
-        return myContacts
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
     }
 
-    private fun removeContact(id: Int):Boolean {
-        // Delete contact records
-        val URL = "content://com.gustavomendez.ContactsProvider/contacts/$id"
-        val contact = Uri.parse(URL)
-        val count = contentResolver.delete(contact, null, null)
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when (item?.itemId) {
+            R.id.delete_all_notes -> {
+                contactViewModel.deleteAllContacts()
+                Snackbar.make(parent_view, "Se han eliminado todos los contactos", Snackbar.LENGTH_LONG).show()
+                true
+            }
+            else -> {
+                super.onOptionsItemSelected(item)
+            }
+        }
+    }
 
-        return count > 0
+    private fun removeContact(position: Int) {
+        // Delete contact records
+        //TODO: use the 'remove()' function of ContactRepo
+        val contactRemoved = adapter.getContactAt(position)
+        Snackbar.make(parent_view, "Contacto '${contactRemoved.name}' eliminado", Snackbar.LENGTH_LONG).show()
+        contactViewModel.delete(contactRemoved)
+
     }
 
 

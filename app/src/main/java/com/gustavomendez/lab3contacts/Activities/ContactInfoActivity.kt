@@ -10,7 +10,6 @@ import android.util.Log
 import com.bumptech.glide.Glide
 import com.gustavomendez.lab3contacts.Activities.MainActivity.Companion.SAVED_CONTACT_ID
 import com.gustavomendez.lab3contacts.Models.Contact
-import com.gustavomendez.lab3contacts.Providers.ContactsProvider
 import kotlinx.android.synthetic.main.activity_contact_info.*
 import kotlinx.android.synthetic.main.toolbar.*
 

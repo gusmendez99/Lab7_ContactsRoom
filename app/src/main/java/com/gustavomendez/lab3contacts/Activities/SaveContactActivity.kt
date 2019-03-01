@@ -1,15 +1,12 @@
 package com.gustavomendez.lab3contacts.Activities
 
 import android.Manifest
-import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.media.MediaScannerConnection
-import android.net.Uri
+import android.graphics.drawable.BitmapDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import com.google.android.material.snackbar.Snackbar
 import androidx.core.app.ActivityCompat
@@ -17,32 +14,34 @@ import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AlertDialog
 import android.util.Log
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.gustavomendez.lab3contacts.Models.Contact
-import com.gustavomendez.lab3contacts.Providers.ContactsProvider
 import com.gustavomendez.lab3contacts.R
+import com.gustavomendez.lab3contacts.ViewModel.ContactViewModel
 import kotlinx.android.synthetic.main.activity_save_contact.*
 import kotlinx.android.synthetic.main.toolbar.*
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
-import java.util.*
 
 class SaveContactActivity : AppCompatActivity() {
 
     companion object {
-        private const val IMAGE_DIRECTORY = "/demonuts"
+        //private const val IMAGE_DIRECTORY = "/demonuts"
         private const val EXTERNAL_WRITE_REQUEST_CODE = 112
         private const val GALLERY = 1
         private const val CAMERA = 2
     }
 
-    private var photoPath:String = ""
+    private val contactViewModel = ViewModelProviders.of(this).get(ContactViewModel::class.java)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_save_contact)
+
+        //Specific setup of view
+        number_picker_priority.minValue = 1
+        number_picker_priority.maxValue = 10
 
         val savedContactId = intent.getIntExtra(MainActivity.SAVED_CONTACT_ID, -1)
 
@@ -52,56 +51,60 @@ class SaveContactActivity : AppCompatActivity() {
 
             //Get only one contact
             val currentContact = getContact(savedContactId)
-            et_contact_name.setText(currentContact!!.name)
-            et_contact_phone.setText(currentContact!!.phone)
-            et_contact_email.setText(currentContact!!.email)
+            et_contact_name.setText(currentContact.name)
+            et_contact_phone.setText(currentContact.phone)
+            et_contact_email.setText(currentContact.email)
+            number_picker_priority.value = currentContact.priority
 
             setupPermissions()
 
             //Setting up the image with Glide, if the path is not null
-            if(currentContact.imagePath.isNotEmpty()) {
-                photoPath = currentContact.imagePath
-                Glide.with(this).load(photoPath).into(iv_contact)
+            if(currentContact.image!!.isNotEmpty()) {
+                Glide.with(this).load(currentContact.image).into(iv_contact)
             }
         } else {
             my_toolbar.title = "Nuevo Contacto"
         }
 
+
+        //General setup of view
         setSupportActionBar(my_toolbar)
 
         btn_save_contact.setOnClickListener {
             val contactName = et_contact_name.text.toString()
             val contactPhone = et_contact_phone.text.toString()
             val contactEmail = et_contact_email.text.toString()
+            val contactPriority = number_picker_priority.value
+
+            val bitmap = (iv_contact.drawable as BitmapDrawable).bitmap
+            val stream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
+            val contactImage = stream.toByteArray()
 
             if (contactName.isNotEmpty() && contactPhone.isNotEmpty() && contactEmail.isNotEmpty()) {
                 //val newContact = Contact(contactName, contactPhone, contactEmail)
                 //MyApplication.addContact(newContact)
 
-                val values = ContentValues()
-                values.put(ContactsProvider.NAME, contactName)
-                values.put(ContactsProvider.PHONE, contactPhone)
-                values.put(ContactsProvider.EMAIL, contactEmail)
-                Log.d("VALUE OF PATH", photoPath)
-                values.put(ContactsProvider.IMAGE_PATH, photoPath)
-
                 if (savedContactId != -1) {
-                    val uri = contentResolver.update(
-                        Uri.parse("${ContactsProvider.URL}/$savedContactId"),
-                        values, null, null
-                    )
+                    //TODO: Update contact
+                    val newContact = Contact(contactName, contactPhone, contactEmail, contactPriority)
+                    newContact.image = contactImage
+                    contactViewModel.update(newContact)
+
                     Snackbar.make(parent_view, "¡Contacto actualizado!", Snackbar.LENGTH_LONG).show()
 
                 } else {
-                    val uri = contentResolver.insert(ContactsProvider.CONTENT_URI, values)
+                    //TODO: Create a new contact
+                    val newContact = Contact(contactName, contactPhone, contactEmail, contactPriority)
+                    newContact.image = contactImage
+                    contactViewModel.insert(newContact)
+
                     et_contact_name.text.clear()
                     et_contact_phone.text.clear()
                     et_contact_email.text.clear()
 
                     Snackbar.make(parent_view, "¡Contacto creado!", Snackbar.LENGTH_LONG).show()
                 }
-                //Toast.makeText(baseContext, uri!!.toString(), Toast.LENGTH_LONG).show()
-
             } else {
                 Snackbar.make(parent_view, "Todos los campos deben ser llenados...", Snackbar.LENGTH_LONG).show()
             }
@@ -178,7 +181,7 @@ class SaveContactActivity : AppCompatActivity() {
                 val contentURI = data!!.data
                 try {
                     val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, contentURI)
-                    photoPath = saveImage(bitmap)
+                    //saveImage(bitmap)
                     Toast.makeText(this@SaveContactActivity, "Imagen establecida exitosamente!", Toast.LENGTH_SHORT)
                         .show()
                     iv_contact!!.setImageBitmap(bitmap)
@@ -194,12 +197,12 @@ class SaveContactActivity : AppCompatActivity() {
             //For get the contact photo from the camera
             val thumbnail = data!!.extras!!.get("data") as Bitmap
             iv_contact!!.setImageBitmap(thumbnail)
-            photoPath = saveImage(thumbnail)
+            //saveImage(thumbnail)
             Toast.makeText(this@SaveContactActivity, "Imagen guardada!", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun saveImage(myBitmap: Bitmap): String {
+    /*private fun saveImage(myBitmap: Bitmap): String {
         val bytes = ByteArrayOutputStream()
         myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes)
         val wallpaperDirectory = File(
@@ -208,7 +211,6 @@ class SaveContactActivity : AppCompatActivity() {
         // have the object build the directory structure, if needed.
         Log.d("fee", wallpaperDirectory.toString())
         if (!wallpaperDirectory.exists()) {
-
             wallpaperDirectory.mkdirs()
         }
 
@@ -236,34 +238,15 @@ class SaveContactActivity : AppCompatActivity() {
         }
 
         return ""
-    }
+    }*/
 
 
     /**
      * Get a single contact by id, can be null
      */
-    private fun getContact(id: Int): Contact? {
-        var currentContact: Contact? = null
-        // Retrieve student records
-        val URL = "content://com.gustavomendez.ContactsProvider/contacts/$id"
-        val contact = Uri.parse(URL)
-        val c = contentResolver.query(contact, null, null, null, "name")
-
-        if (c.moveToFirst()) {
-            currentContact = Contact(
-                c.getColumnIndex(ContactsProvider._ID),
-                c.getString(c.getColumnIndex(ContactsProvider.NAME)),
-                c.getString(c.getColumnIndex(ContactsProvider.PHONE)),
-                c.getString(c.getColumnIndex(ContactsProvider.EMAIL)),
-                c.getString(c.getColumnIndex(ContactsProvider.IMAGE_PATH))
-            )
-
-        }
-        c.close()
-
-        return currentContact
+    private fun getContact(id: Int): Contact {
+        return contactViewModel.getContact(id)
     }
-
 
     /**
      * Method to accept/decline permission on real time
