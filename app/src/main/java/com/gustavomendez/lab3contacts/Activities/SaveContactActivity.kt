@@ -1,6 +1,7 @@
 package com.gustavomendez.lab3contacts.Activities
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -51,19 +52,18 @@ class SaveContactActivity : AppCompatActivity() {
             my_toolbar.title = "Editar Contacto"
             btn_save_contact.text = getString(R.string.save)
 
-            //Get only one contact
-            val currentContact = getContact(savedContactId)
-            et_contact_name.setText(currentContact.name)
-            et_contact_phone.setText(currentContact.phone)
-            et_contact_email.setText(currentContact.email)
-            number_picker_priority.value = currentContact.priority
+
+            et_contact_name.setText(intent.getStringExtra(MainActivity.SAVED_CONTACT_NAME))
+            et_contact_phone.setText(intent.getStringExtra(MainActivity.SAVED_CONTACT_PHONE))
+            et_contact_email.setText(intent.getStringExtra(MainActivity.SAVED_CONTACT_EMAIL))
+            number_picker_priority.value = intent.getIntExtra(MainActivity.SAVED_CONTACT_PRIORITY, 1)
 
             setupPermissions()
 
             //Setting up the image with Glide, if the path is not null
-            if(currentContact.image!!.isNotEmpty()) {
-                Glide.with(this).load(currentContact.image).into(iv_contact)
-            }
+            Glide.with(this).load(intent.getByteArrayExtra(MainActivity.SAVED_CONTACT_IMAGE)).into(iv_contact)
+
+
         } else {
             my_toolbar.title = "Nuevo Contacto"
         }
@@ -73,40 +73,31 @@ class SaveContactActivity : AppCompatActivity() {
         setSupportActionBar(my_toolbar)
 
         btn_save_contact.setOnClickListener {
-            val contactName = et_contact_name.text.toString()
-            val contactPhone = et_contact_phone.text.toString()
-            val contactEmail = et_contact_email.text.toString()
-            val contactPriority = number_picker_priority.value
 
             val bitmap = (iv_contact.drawable as BitmapDrawable).bitmap
             val stream = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
             val contactImage = stream.toByteArray()
 
-            if (contactName.isNotEmpty() && contactPhone.isNotEmpty() && contactEmail.isNotEmpty()) {
+            if (et_contact_name.text.toString().isNotEmpty() && et_contact_phone.text.toString().isNotEmpty()
+                && et_contact_email.text.toString().isNotEmpty()) {
                 //val newContact = Contact(contactName, contactPhone, contactEmail)
                 //MyApplication.addContact(newContact)
 
-                if (savedContactId != -1) {
-                    //TODO: Update contact
-                    val newContact = Contact(contactName, contactPhone, contactEmail, contactPriority)
-                    newContact.image = contactImage
-                    contactViewModel.update(newContact)
+                    val data = Intent().apply {
+                        putExtra(MainActivity.SAVED_CONTACT_NAME, et_contact_name.text.toString())
+                        putExtra(MainActivity.SAVED_CONTACT_PHONE, et_contact_phone.text.toString())
+                        putExtra(MainActivity.SAVED_CONTACT_EMAIL, et_contact_email.text.toString())
+                        putExtra(MainActivity.SAVED_CONTACT_PRIORITY, number_picker_priority.value)
+                        putExtra(MainActivity.SAVED_CONTACT_IMAGE, contactImage)
+                        if (intent.getIntExtra(MainActivity.SAVED_CONTACT_ID, -1) != -1) {
+                            putExtra(MainActivity.SAVED_CONTACT_ID, intent.getIntExtra(MainActivity.SAVED_CONTACT_ID, -1))
+                        }
+                    }
 
-                    Snackbar.make(parent_view, "¡Contacto actualizado!", Snackbar.LENGTH_LONG).show()
+                    setResult(Activity.RESULT_OK, data)
+                    finish()
 
-                } else {
-                    //TODO: Create a new contact
-                    val newContact = Contact(contactName, contactPhone, contactEmail, contactPriority)
-                    newContact.image = contactImage
-                    contactViewModel.insert(newContact)
-
-                    et_contact_name.text.clear()
-                    et_contact_phone.text.clear()
-                    et_contact_email.text.clear()
-
-                    Snackbar.make(parent_view, "¡Contacto creado!", Snackbar.LENGTH_LONG).show()
-                }
             } else {
                 Snackbar.make(parent_view, "Todos los campos deben ser llenados...", Snackbar.LENGTH_LONG).show()
             }
@@ -242,13 +233,6 @@ class SaveContactActivity : AppCompatActivity() {
         return ""
     }*/
 
-
-    /**
-     * Get a single contact by id, can be null
-     */
-    private fun getContact(id: Int): Contact {
-        return contactViewModel.getContact(id)
-    }
 
     /**
      * Method to accept/decline permission on real time

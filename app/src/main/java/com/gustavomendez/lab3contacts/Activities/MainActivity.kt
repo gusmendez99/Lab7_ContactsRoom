@@ -1,5 +1,6 @@
 package com.gustavomendez.lab3contacts.Activities
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +27,13 @@ class MainActivity : AppCompatActivity() {
         lateinit var adapter: ContactAdapter
         //Constants for the intent keys
         const val SAVED_CONTACT_ID = "savedContactId"
+        const val SAVED_CONTACT_NAME = "savedContactName"
+        const val SAVED_CONTACT_PHONE = "savedContactPhone"
+        const val SAVED_CONTACT_EMAIL = "savedContactEmail"
+        const val SAVED_CONTACT_PRIORITY = "savedContactPriority"
+        const val SAVED_CONTACT_IMAGE = "savedContactImage"
+        const val ADD_CONTACT_REQUEST = 1
+        const val SHOW_CONTACT_REQUEST = 2
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,10 +76,19 @@ class MainActivity : AppCompatActivity() {
         adapter = ContactAdapter { contact ->
             run {
                 //Get a callback with the contact info
-                val intent = Intent(this, ContactInfoActivity::class.java)
+                /*val intent = Intent(this, ContactInfoActivity::class.java)
                 intent.putExtra(SAVED_CONTACT_ID, contact.id)
                 startActivity(intent)
-                this.finish()
+                this.finish()*/
+                var intent = Intent(baseContext, ContactInfoActivity::class.java)
+                intent.putExtra(SAVED_CONTACT_ID, contact.id)
+                intent.putExtra(SAVED_CONTACT_NAME, contact.name)
+                intent.putExtra(SAVED_CONTACT_EMAIL, contact.email)
+                intent.putExtra(SAVED_CONTACT_PRIORITY, contact.priority)
+                intent.putExtra(SAVED_CONTACT_PHONE, contact.phone)
+                intent.putExtra(SAVED_CONTACT_IMAGE, contact.image)
+
+                startActivityForResult(intent, SHOW_CONTACT_REQUEST)
 
             }
         }
@@ -80,8 +97,12 @@ class MainActivity : AppCompatActivity() {
         rv_contact_list.adapter = adapter
 
         btn_add_contact.setOnClickListener {
-            startActivity(Intent(this, SaveContactActivity::class.java))
-            this.finish()
+            //startActivity(Intent(this, SaveContactActivity::class.java))
+            //this.finish()
+            startActivityForResult(
+                Intent(this, SaveContactActivity::class.java),
+                ADD_CONTACT_REQUEST
+            )
         }
     }
 
@@ -110,6 +131,42 @@ class MainActivity : AppCompatActivity() {
         val contactRemoved = adapter.getContactAt(position)
         Snackbar.make(parent_view, "Contacto '${contactRemoved.name}' eliminado", Snackbar.LENGTH_LONG).show()
         contactViewModel.delete(contactRemoved)
+
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == ADD_CONTACT_REQUEST && resultCode == Activity.RESULT_OK) {
+            val newContact = Contact(
+                data!!.getStringExtra(SAVED_CONTACT_NAME),
+                data!!.getStringExtra(SAVED_CONTACT_PHONE),
+                data!!.getStringExtra(SAVED_CONTACT_EMAIL),
+                data.getIntExtra(SAVED_CONTACT_PRIORITY, 1)
+            )
+
+            newContact.image = data.getByteArrayExtra(SAVED_CONTACT_IMAGE)
+
+            contactViewModel.insert(newContact)
+
+            Snackbar.make(parent_view, "Contacto guardado", Snackbar.LENGTH_LONG).show()
+
+        } else if (requestCode == SHOW_CONTACT_REQUEST && resultCode == Activity.RESULT_OK) {
+            Snackbar.make(parent_view, "Cambios al dia...", Snackbar.LENGTH_LONG).show()
+
+            /*val updateCo = Contact(
+                data!!.getStringExtra(AddEditNoteActivity.EXTRA_TITLE),
+                data.getStringExtra(AddEditNoteActivity.EXTRA_DESCRIPTION),
+                data.getIntExtra(AddEditNoteActivity.EXTRA_PRIORITY, 1)
+            )
+            updateNote.id = data.getIntExtra(AddEditNoteActivity.EXTRA_ID, -1)
+            noteViewModel.update(updateNote)*/
+
+        } else {
+            Snackbar.make(parent_view, "Nothing to do...", Snackbar.LENGTH_LONG).show()
+
+        }
+
 
     }
 

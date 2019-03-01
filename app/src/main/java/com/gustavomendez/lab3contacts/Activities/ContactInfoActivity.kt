@@ -1,5 +1,6 @@
 package com.gustavomendez.lab3contacts.Activities
 
+import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.gustavomendez.lab3contacts.R
@@ -10,6 +11,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.gustavomendez.lab3contacts.Activities.MainActivity.Companion.SAVED_CONTACT_ID
+import com.gustavomendez.lab3contacts.Activities.MainActivity.Companion.SAVED_CONTACT_NAME
 import com.gustavomendez.lab3contacts.Models.Contact
 import com.gustavomendez.lab3contacts.ViewModel.ContactViewModel
 import kotlinx.android.synthetic.main.activity_contact_info.*
@@ -17,6 +19,10 @@ import kotlinx.android.synthetic.main.toolbar.*
 
 
 class ContactInfoActivity : AppCompatActivity() {
+
+    companion object {
+        const val EDIT_CONTACT_REQUEST = 3
+    }
 
     private lateinit var contactViewModel:ContactViewModel
 
@@ -28,19 +34,14 @@ class ContactInfoActivity : AppCompatActivity() {
 
         contactViewModel = ViewModelProviders.of(this).get(ContactViewModel::class.java)
 
+        tv_contact_name.text = intent.getStringExtra(MainActivity.SAVED_CONTACT_NAME)
+        tv_contact_phone.text = intent.getStringExtra(MainActivity.SAVED_CONTACT_PHONE)
+        tv_contact_email.text = intent.getStringExtra(MainActivity.SAVED_CONTACT_EMAIL)
+        tv_contact_priority.text = intent.getIntExtra(MainActivity.SAVED_CONTACT_PRIORITY, 1).toString()
+        Glide.with(this).load(intent.getByteArrayExtra(MainActivity.SAVED_CONTACT_IMAGE)).into(iv_contact)
 
-        //Parsing data from the intent
-        val savedContactId = intent.getIntExtra(SAVED_CONTACT_ID, -1)
-        val savedContact = getContact(savedContactId)
 
-        tv_contact_name.text = savedContact?.name
-        tv_contact_phone.text = savedContact?.phone
-        tv_contact_email.text = savedContact?.email
-        tv_contact_priority.text = savedContact?.priority.toString()
 
-        if(savedContact!!.image!!.isNotEmpty()){
-            Glide.with(this).load(savedContact!!.image).into(iv_contact)
-        }
 
         tv_contact_email.setOnClickListener {
             val emailIntent = Intent(Intent.ACTION_SEND)
@@ -48,7 +49,7 @@ class ContactInfoActivity : AppCompatActivity() {
             //Making the intent for email
             emailIntent.data = Uri.parse("mailto:")
             emailIntent.type = "text/plain"
-            emailIntent.putExtra(Intent.EXTRA_EMAIL, savedContact!!.email)
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, intent.getStringExtra(MainActivity.SAVED_CONTACT_EMAIL))
             emailIntent.putExtra(Intent.EXTRA_TEXT, "Mi nombre es Gus Mendez, y mi teléfono es 32349997")
 
             try {
@@ -60,35 +61,67 @@ class ContactInfoActivity : AppCompatActivity() {
         }
 
         tv_contact_phone.setOnClickListener {
-            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${savedContact.phone}"))
+            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${intent.getStringExtra(MainActivity.SAVED_CONTACT_PHONE)}"))
             startActivity(intent)
         }
 
         btn_back.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            this.finish()
+            setResult(Activity.RESULT_OK)
+            finish()
         }
 
         btn_edit.setOnClickListener {
-            val intent = Intent(this, SaveContactActivity::class.java)
+            /*val intent = Intent(this, SaveContactActivity::class.java)
             intent.putExtra(MainActivity.SAVED_CONTACT_ID, savedContactId)
             startActivity(intent)
-            this.finish()
+            this.finish()*/
+            var intent = Intent(baseContext, SaveContactActivity::class.java)
+
+            val id = intent.getIntExtra(MainActivity.SAVED_CONTACT_ID, -1)
+
+            intent.putExtra(MainActivity.SAVED_CONTACT_ID, id)
+            intent.putExtra(MainActivity.SAVED_CONTACT_NAME, intent.getStringExtra(MainActivity.SAVED_CONTACT_NAME))
+            intent.putExtra(MainActivity.SAVED_CONTACT_PHONE, intent.getStringExtra(MainActivity.SAVED_CONTACT_PHONE))
+            intent.putExtra(MainActivity.SAVED_CONTACT_EMAIL, intent.getStringExtra(MainActivity.SAVED_CONTACT_EMAIL))
+            intent.putExtra(MainActivity.SAVED_CONTACT_PRIORITY, intent.getStringExtra(MainActivity.SAVED_CONTACT_PRIORITY))
+            intent.putExtra(MainActivity.SAVED_CONTACT_IMAGE, intent.getStringExtra(MainActivity.SAVED_CONTACT_IMAGE))
+
+            startActivityForResult(intent, EDIT_CONTACT_REQUEST)
         }
 
 
-    }
-
-    private fun getContact(id: Int): Contact {
-        return contactViewModel.getContact(id)
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        this.finish()
+
+        setResult(Activity.RESULT_OK)
+        finish()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == EDIT_CONTACT_REQUEST && resultCode == Activity.RESULT_OK) {
+            val id = data?.getIntExtra(MainActivity.SAVED_CONTACT_ID, -1)
+
+            val updateContact = Contact(
+                data!!.getStringExtra(MainActivity.SAVED_CONTACT_NAME),
+                data!!.getStringExtra(MainActivity.SAVED_CONTACT_PHONE),
+                data!!.getStringExtra(MainActivity.SAVED_CONTACT_EMAIL),
+                data.getIntExtra(MainActivity.SAVED_CONTACT_PRIORITY, 1)
+            )
+
+            updateContact.image = data.getByteArrayExtra(MainActivity.SAVED_CONTACT_IMAGE)
+            updateContact.id = id!!
+            contactViewModel.update(updateContact)
+            Snackbar.make(parent_view, "Contacto actualizado", Snackbar.LENGTH_LONG).show()
+
+        } else {
+            Snackbar.make(parent_view, "Error al actualizar...", Snackbar.LENGTH_LONG).show()
+        }
+
+
     }
 
 }
