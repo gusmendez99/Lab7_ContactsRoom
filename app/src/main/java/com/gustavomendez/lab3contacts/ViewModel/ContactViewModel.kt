@@ -31,7 +31,4 @@ class ContactViewModel(application: Application) : AndroidViewModel(application)
         return allContacts
     }
 
-    fun getContact(id:Int): Contact {
-        return repository.getContact(id)
-    }
 }

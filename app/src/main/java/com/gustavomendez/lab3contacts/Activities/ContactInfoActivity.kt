@@ -7,20 +7,27 @@ import android.content.Intent
 import android.net.Uri
 import com.google.android.material.snackbar.Snackbar
 import android.util.Log
+import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.gustavomendez.lab3contacts.Activities.MainActivity.Companion.SAVED_CONTACT_ID
 import com.gustavomendez.lab3contacts.Models.Contact
+import com.gustavomendez.lab3contacts.ViewModel.ContactViewModel
 import kotlinx.android.synthetic.main.activity_contact_info.*
 import kotlinx.android.synthetic.main.toolbar.*
 
 
 class ContactInfoActivity : AppCompatActivity() {
 
+    private lateinit var contactViewModel:ContactViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_contact_info)
         my_toolbar.title = "Ver Contacto"
         setSupportActionBar(my_toolbar)
+
+        contactViewModel = ViewModelProviders.of(this).get(ContactViewModel::class.java)
+
 
         //Parsing data from the intent
         val savedContactId = intent.getIntExtra(SAVED_CONTACT_ID, -1)
@@ -29,9 +36,10 @@ class ContactInfoActivity : AppCompatActivity() {
         tv_contact_name.text = savedContact?.name
         tv_contact_phone.text = savedContact?.phone
         tv_contact_email.text = savedContact?.email
+        tv_contact_priority.text = savedContact?.priority.toString()
 
-        if(savedContact!!.imagePath.isNotEmpty()){
-            Glide.with(this).load(savedContact!!.imagePath).into(iv_contact)
+        if(savedContact!!.image!!.isNotEmpty()){
+            Glide.with(this).load(savedContact!!.image).into(iv_contact)
         }
 
         tv_contact_email.setOnClickListener {
@@ -72,26 +80,8 @@ class ContactInfoActivity : AppCompatActivity() {
 
     }
 
-    private fun getContact(id: Int): Contact? {
-        var currentContact: Contact? = null
-        // Retrieve student records
-        val URL = "content://com.gustavomendez.ContactsProvider/contacts/$id"
-        val contact = Uri.parse(URL)
-        val c = contentResolver.query(contact, null, null, null, "name")
-
-        if (c.moveToFirst()) {
-            currentContact = Contact(
-                c.getColumnIndex(ContactsProvider._ID),
-                c.getString(c.getColumnIndex(ContactsProvider.NAME)),
-                c.getString(c.getColumnIndex(ContactsProvider.PHONE)),
-                c.getString(c.getColumnIndex(ContactsProvider.EMAIL)),
-                c.getString(c.getColumnIndex(ContactsProvider.IMAGE_PATH))
-            )
-
-        }
-        c.close()
-
-        return currentContact
+    private fun getContact(id: Int): Contact {
+        return contactViewModel.getContact(id)
     }
 
     override fun onBackPressed() {

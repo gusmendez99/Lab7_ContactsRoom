@@ -13,4 +13,5 @@
     <string name="edit">Editar</string>
     <string name="save">Guardar</string>
     <string name="remove_all_contacts">Eliminar todos</string>
+    <string name="priority">Prioridad:</string>
 </resources>

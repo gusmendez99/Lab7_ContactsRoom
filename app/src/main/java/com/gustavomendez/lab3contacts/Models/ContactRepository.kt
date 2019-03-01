@@ -41,11 +41,9 @@ class ContactRepository(application: Application) {
         return allContacts
     }
 
-    fun getContact(id: Int): Contact {
-        return contactDao.getContact(id).first()
-    }
 
     companion object {
+
         private class InsertContactAsyncTask(contactDao: ContactDao) : AsyncTask<Contact, Unit, Unit>() {
             val contactDao = contactDao
 

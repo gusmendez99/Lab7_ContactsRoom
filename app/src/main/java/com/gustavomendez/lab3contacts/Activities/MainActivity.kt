@@ -41,6 +41,8 @@ class MainActivity : AppCompatActivity() {
 
         contactViewModel = ViewModelProviders.of(this).get(ContactViewModel::class.java)
 
+
+
         contactViewModel.getAllContacts().observe(this, Observer<List<Contact>> {
             adapter.submitList(it)
         })
@@ -100,6 +102,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun removeContact(position: Int) {
         // Delete contact records

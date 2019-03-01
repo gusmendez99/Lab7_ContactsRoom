@@ -44,8 +44,6 @@
 
         </activity>
 
-        <provider android:name=".Providers.ContactsProvider"
-                  android:authorities="com.gustavomendez.ContactsProvider"/>
 
     </application>
 

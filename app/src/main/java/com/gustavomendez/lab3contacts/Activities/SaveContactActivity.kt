@@ -33,11 +33,13 @@ class SaveContactActivity : AppCompatActivity() {
         private const val CAMERA = 2
     }
 
-    private val contactViewModel = ViewModelProviders.of(this).get(ContactViewModel::class.java)
+    private lateinit var contactViewModel: ContactViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_save_contact)
+
+        contactViewModel = ViewModelProviders.of(this).get(ContactViewModel::class.java)
 
         //Specific setup of view
         number_picker_priority.minValue = 1
