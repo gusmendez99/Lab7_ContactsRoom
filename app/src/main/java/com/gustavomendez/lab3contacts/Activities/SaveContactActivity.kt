@@ -35,6 +35,7 @@ class SaveContactActivity : AppCompatActivity() {
     }
 
     private lateinit var contactViewModel: ContactViewModel
+    private var currentId = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +58,8 @@ class SaveContactActivity : AppCompatActivity() {
             et_contact_phone.setText(intent.getStringExtra(MainActivity.SAVED_CONTACT_PHONE))
             et_contact_email.setText(intent.getStringExtra(MainActivity.SAVED_CONTACT_EMAIL))
             number_picker_priority.value = intent.getIntExtra(MainActivity.SAVED_CONTACT_PRIORITY, 1)
+
+            currentId = savedContactId
 
             setupPermissions()
 
@@ -90,8 +93,8 @@ class SaveContactActivity : AppCompatActivity() {
                         putExtra(MainActivity.SAVED_CONTACT_EMAIL, et_contact_email.text.toString())
                         putExtra(MainActivity.SAVED_CONTACT_PRIORITY, number_picker_priority.value)
                         putExtra(MainActivity.SAVED_CONTACT_IMAGE, contactImage)
-                        if (intent.getIntExtra(MainActivity.SAVED_CONTACT_ID, -1) != -1) {
-                            putExtra(MainActivity.SAVED_CONTACT_ID, intent.getIntExtra(MainActivity.SAVED_CONTACT_ID, -1))
+                        if (currentId != -1) {
+                            putExtra(MainActivity.SAVED_CONTACT_ID, currentId)
                         }
                     }
 

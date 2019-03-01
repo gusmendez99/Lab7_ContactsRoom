@@ -25,6 +25,8 @@ class ContactInfoActivity : AppCompatActivity() {
     }
 
     private lateinit var contactViewModel:ContactViewModel
+    private lateinit var currentImage: ByteArray
+    private var currentId:Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +40,11 @@ class ContactInfoActivity : AppCompatActivity() {
         tv_contact_phone.text = intent.getStringExtra(MainActivity.SAVED_CONTACT_PHONE)
         tv_contact_email.text = intent.getStringExtra(MainActivity.SAVED_CONTACT_EMAIL)
         tv_contact_priority.text = intent.getIntExtra(MainActivity.SAVED_CONTACT_PRIORITY, 1).toString()
-        Glide.with(this).load(intent.getByteArrayExtra(MainActivity.SAVED_CONTACT_IMAGE)).into(iv_contact)
+
+        currentId = intent.getIntExtra(MainActivity.SAVED_CONTACT_ID, 1)
+        currentImage = intent.getByteArrayExtra(MainActivity.SAVED_CONTACT_IMAGE)
+
+        Glide.with(this).load(currentImage).into(iv_contact)
 
 
 
@@ -77,14 +83,18 @@ class ContactInfoActivity : AppCompatActivity() {
             this.finish()*/
             var intent = Intent(baseContext, SaveContactActivity::class.java)
 
-            val id = intent.getIntExtra(MainActivity.SAVED_CONTACT_ID, -1)
+            intent.putExtra(MainActivity.SAVED_CONTACT_ID, currentId)
+            intent.putExtra(MainActivity.SAVED_CONTACT_NAME, tv_contact_name.text.toString())
+            intent.putExtra(MainActivity.SAVED_CONTACT_PHONE, tv_contact_phone.text.toString())
+            intent.putExtra(MainActivity.SAVED_CONTACT_EMAIL, tv_contact_email.text.toString())
+            intent.putExtra(MainActivity.SAVED_CONTACT_PRIORITY, tv_contact_priority.text.toString())
+            intent.putExtra(MainActivity.SAVED_CONTACT_IMAGE, currentImage)
 
-            intent.putExtra(MainActivity.SAVED_CONTACT_ID, id)
-            intent.putExtra(MainActivity.SAVED_CONTACT_NAME, intent.getStringExtra(MainActivity.SAVED_CONTACT_NAME))
-            intent.putExtra(MainActivity.SAVED_CONTACT_PHONE, intent.getStringExtra(MainActivity.SAVED_CONTACT_PHONE))
-            intent.putExtra(MainActivity.SAVED_CONTACT_EMAIL, intent.getStringExtra(MainActivity.SAVED_CONTACT_EMAIL))
-            intent.putExtra(MainActivity.SAVED_CONTACT_PRIORITY, intent.getStringExtra(MainActivity.SAVED_CONTACT_PRIORITY))
-            intent.putExtra(MainActivity.SAVED_CONTACT_IMAGE, intent.getStringExtra(MainActivity.SAVED_CONTACT_IMAGE))
+
+
+            //Glide.with(this).load()).into(iv_contact)
+
+
 
             startActivityForResult(intent, EDIT_CONTACT_REQUEST)
         }
@@ -115,6 +125,19 @@ class ContactInfoActivity : AppCompatActivity() {
             updateContact.image = data.getByteArrayExtra(MainActivity.SAVED_CONTACT_IMAGE)
             updateContact.id = id!!
             contactViewModel.update(updateContact)
+
+            //Updating contact
+            tv_contact_name.text = updateContact.name
+            tv_contact_phone.text = updateContact.phone
+            tv_contact_email.text = updateContact.email
+            tv_contact_priority.text = updateContact.priority.toString()
+
+            currentId = updateContact.id
+            currentImage = updateContact.image!!
+
+            Glide.with(this).load(currentImage).into(iv_contact)
+
+
             Snackbar.make(parent_view, "Contacto actualizado", Snackbar.LENGTH_LONG).show()
 
         } else {

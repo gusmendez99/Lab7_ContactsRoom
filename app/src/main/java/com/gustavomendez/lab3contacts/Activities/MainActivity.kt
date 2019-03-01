@@ -154,14 +154,6 @@ class MainActivity : AppCompatActivity() {
         } else if (requestCode == SHOW_CONTACT_REQUEST && resultCode == Activity.RESULT_OK) {
             Snackbar.make(parent_view, "Cambios al dia...", Snackbar.LENGTH_LONG).show()
 
-            /*val updateCo = Contact(
-                data!!.getStringExtra(AddEditNoteActivity.EXTRA_TITLE),
-                data.getStringExtra(AddEditNoteActivity.EXTRA_DESCRIPTION),
-                data.getIntExtra(AddEditNoteActivity.EXTRA_PRIORITY, 1)
-            )
-            updateNote.id = data.getIntExtra(AddEditNoteActivity.EXTRA_ID, -1)
-            noteViewModel.update(updateNote)*/
-
         } else {
             Snackbar.make(parent_view, "Nothing to do...", Snackbar.LENGTH_LONG).show()
 
